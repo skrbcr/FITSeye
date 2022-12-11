@@ -7,12 +7,12 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 from astropy.io import fits
 from .common import Common as c
-from .file import FileDialog
+from .file import FileManager
 from .select import Select
 
 class FITSeye:
-    def __init__(self):
-        self.__fileDlg = FileDialog()
+    def __init__(self, filename: str=''):
+        self.__fileMgr = FileManager()
         self.__select = Select()
         c.root = tk.Tk()
         screen_width = c.root.winfo_screenwidth()
@@ -25,13 +25,27 @@ class FITSeye:
             c.root.iconbitmap('')
         except:
             pass
-    def main(self):
+        # Menu
+        # menubar = tk.Menu(c.root)
+        # c.root.config(menu=menubar)
+        # menu_file = tk.Menu(menubar, tearoff=False)
+        # menu_file.add_command(label='Open FITS file...', command=self.__fileMgr.evOpenFile)
+        # menu_file.add_command(label='Export(not available now)')
+        # menu_file.add_separator()
+        # menu_file.add_command(label='Quit', command=c.root.destroy)
+        # menubar.add_cascade(label='File', menu=menu_file, underline=0)
         ttk.Label(c.root, text='FITSeye version 0.1').pack()
-        btn_open = self.__makeButton('Open FITS file', self.__fileDlg.evOpenFile).pack()
+        btn_open = self.__makeButton('Open FITS file', self.__fileMgr.evOpenFile).pack()
         btn_select = self.__makeButton('Select', self.__select.evSelect).pack()
         btn_hist = self.__makeButton('Histogram', self.__dialogHist).pack()
         btn_plot = self.__makeButton('2D Plot', self.__dialog2d).pack()
         btn_expt = self.__makeButton('Export').pack()
+        if filename != '':
+            self.__openFromCmd(filename)
+    def __del__(self):
+        if c.hdul != None:
+            c.hdul.close()
+    def main(self):
         try:
             from ctypes import windll
             windll.shcore.SetProcessDpiAwareness(1)
@@ -39,6 +53,8 @@ class FITSeye:
             pass
         finally:
             c.root.mainloop()
+    def __openFromCmd(self, filename: str):
+        self.__fileMgr.openFile(filename)
     # Histogram
     def __dialogHist(self, event):
         if c.__hdul != None:
