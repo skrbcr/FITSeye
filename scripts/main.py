@@ -1,3 +1,4 @@
+import sys
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog as fd
@@ -12,39 +13,30 @@ from .select import Select
 
 class FITSeye:
     def __init__(self, filename: str=''):
-        self.__fileMgr = FileManager()
-        self.__select = Select()
-        c.root = tk.Tk()
-        screen_width = c.root.winfo_screenwidth()
-        screen_height = c.root.winfo_screenheight()
-        c.root.geometry('600x400')
-        # c.root.resizable()
-        # c.root.attributes()
-        c.root.title('FITSeye')
+        self.__lFileMgr = []
+        self.__root = tk.Tk()
+        screen_width = self.__root.winfo_screenwidth()
+        screen_height = self.__root.winfo_screenheight()
+        self.__root.geometry('600x400')
+        # self.__root.resizable()
+        # self.__root.attributes()
+        self.__root.title('FITSeye')
         try:
-            c.root.iconbitmap('')
+            self.__root.iconbitmap('')
         except:
             pass
-        # Menu
-        # menubar = tk.Menu(c.root)
-        # c.root.config(menu=menubar)
-        # menu_file = tk.Menu(menubar, tearoff=False)
-        # menu_file.add_command(label='Open FITS file...', command=self.__fileMgr.evOpenFile)
-        # menu_file.add_command(label='Export(not available now)')
-        # menu_file.add_separator()
-        # menu_file.add_command(label='Quit', command=c.root.destroy)
-        # menubar.add_cascade(label='File', menu=menu_file, underline=0)
-        ttk.Label(c.root, text='FITSeye version 0.1').pack()
-        btn_open = self.__makeButton('Open FITS file', self.__fileMgr.evOpenFile).pack()
-        btn_select = self.__makeButton('Select', self.__select.evSelect).pack()
-        btn_hist = self.__makeButton('Histogram', self.__dialogHist).pack()
-        btn_plot = self.__makeButton('2D Plot', self.__dialog2d).pack()
-        btn_expt = self.__makeButton('Export').pack()
+        ttk.Label(self.__root, text='FITSeye version 0.1').pack()
+        btn_open = self.__makeButton('Open FITS file', self.__evOpenFile).pack()
+        # btn_select = self.__makeButton('Select', self.__select.evSelect).pack()
+        # btn_hist = self.__makeButton('Histogram', self.__dialogHist).pack()
+        # btn_plot = self.__makeButton('2D Plot', self.__dialog2d).pack()
+        # btn_expt = self.__makeButton('Export').pack()
+        btn_about = ttk.Button(self.__root, text='About FITSeye')
+        btn_about.pack()
         if filename != '':
-            self.__openFromCmd(filename)
+            self.__openFile(filename)
     def __del__(self):
-        if c.hdul != None:
-            c.hdul.close()
+        pass
     def main(self):
         try:
             from ctypes import windll
@@ -52,9 +44,18 @@ class FITSeye:
         except:
             pass
         finally:
-            c.root.mainloop()
-    def __openFromCmd(self, filename: str):
-        self.__fileMgr.openFile(filename)
+            self.__root.mainloop()
+    def __evOpenFile(self, event):
+        filename = fd.askopenfilename(title='Open a file', initialdir='~', filetypes=[('FITS files', '*.fits'), ('FITS files', '*.fit'), ('FITS files', '*.fts'), ('All files', '.*')])
+        if filename != '' and filename != ():
+            self.__openFile(filename)
+    def __openFile(self, filename: str):
+        try:
+            self.__lFileMgr.append(FileManager(filename))
+        except Exception as e:
+            # del self.__lFileMgr[-1]
+            msg.showerror(title='File open error', message='Cannot open "' + filename + '".')
+            print(e, file=sys.stderr)
     # Histogram
     def __dialogHist(self, event):
         if c.__hdul != None:
@@ -100,7 +101,7 @@ class FITSeye:
     # Utilities
     def __makeButton(self, text, bindFunc=None, root=None):
         if root == None:
-            root = c.root
+            root = self.__root
         btn = ttk.Button(root, text=text)
         btn.bind('<Button-1>', bindFunc)
         return btn

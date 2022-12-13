@@ -7,35 +7,59 @@ import tkinter.messagebox as msg
 from astropy.io import fits
 
 class FileManager:
-    def __init__(self):
-        self.__dlg = None
-    def evOpenFile(self, event=None):
-        filename = fd.askopenfilename(title='Open a file', initialdir='~', filetypes=[('FITS files', '*.fits'), ('FITS files', '*.fit'), ('FITS files', '*.fts'), ('All files', '.*')])
-        if filename != '' and filename != ():
-            self.openFile(filename)
-            # try:
-            #     self.openFile(filename)
-            #     msg.showinfo(title='Open file', message=filename)
-            # except Exception as e:
-            #     msg.showerror(title='File open error', message='Cannot load "' + filename +'".\nThis file doesn\'t seem FITS file.')
-                # print(e)
-    def openFile(self, filename: str):
-        if c.hdul != None:
-            c.hdul.close()
+    def __init__(self, filename: str):
+        # Read FITS file
+        self.__filename = filename
         try:
-            c.hdul = fits.open(filename)
+            self.__hdul = fits.open(filename)
         except Exception as e:
-            msg.showerror(title='File open error', message='Cannot open "' + filename + '".')
-            print(e, file=sys.stderr)
-            return
-        c.n_hdul = len(c.hdul)
-        self.__dlg = tk.Toplevel(c.root)
-        self.__dlg.title('FITSeye: ' + filename)
-        self.__dlg.geometry('800x300')
-        self.__dlg.focus_set()
-        c.data = c.hdul['EVENTS']
-        n: int = len(c.data.columns.names)
-        for i in range(n):
-            c.lItemRange.append([c.data.columns.names[i], None, None])
-        c.bOpen = True
+            self.__hdul = None
+            raise e
+        # Analyze HDUL
+        self.__lenHDUL: int = len(self.__hdul)
+        # Make File Top Dialog
+        try:
+            self.__makeTopDlg()
+        except Exception as e:
+            print('Error: something went wrong with making "File Top Dialog". Please notify the author on this issue.', file=sys.stderr)
+            raise e
+        self.__data = []
+    def __del__(self):
+        if self.__hdul != None:
+            self.__hdul.close()
+    def __makeTopDlg(self):
+        # Dialog
+        self.__dlgTop = tk.Toplevel()
+        self.__dlgTop.title('FITSeye: ' + self.__filename)
+        self.__dlgTop.geometry('800x300')
+        self.__dlgTop.focus_set()
+        # Table
+        ttk.Label(self.__dlgTop, text='Index').grid(row=0, column=0)
+        ttk.Label(self.__dlgTop, text='Extension').grid(row=0, column=1)
+        ttk.Label(self.__dlgTop, text='Table Size').grid(row=0, column=2)
+        lbtn = []
+        for i, hdu in enumerate(self.__hdul):
+            summary = hdu._summary()
+            ttk.Label(self.__dlgTop, text=str(i)).grid(row=i+1, column=0)
+            ttk.Label(self.__dlgTop, text=str(summary[0])).grid(row=i+1, column=1)
+            ttk.Label(self.__dlgTop, text=str(summary[4])).grid(row=i+1, column=2)
+            # Buttons
+            if hdu.header['NAXIS'] == 0:
+                lbtn.append([
+                    ttk.Button(self.__dlgTop, text='Header').grid(row=i+1, column=3)
+                ])
+            else:
+                lbtn.append([
+                    ttk.Button(self.__dlgTop, text='Header').grid(row=i+1, column=3),
+                    ttk.Button(self.__dlgTop, text='Hist').grid(row=i+1, column=4),
+                    ttk.Button(self.__dlgTop, text='Table').grid(row=i+1, column=5)
+                ])
+        # Menu
+        menubar = tk.Menu(self.__dlgTop)
+        self.__dlgTop.config(menu=menubar)
+        menu_file = tk.Menu(menubar, tearoff=False)
+        menu_file.add_command(label='Export(not available now)')
+        menu_file.add_separator()
+        menu_file.add_command(label='Quit', command=self.__dlgTop.destroy)
+        menubar.add_cascade(label='File', menu=menu_file, underline=0)
 
