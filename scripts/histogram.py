@@ -6,6 +6,7 @@ from astropy.io import fits
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import plotly.express as px
 
 mpl.style.use('fast')
 
@@ -109,9 +110,22 @@ class Hist:
             if bLim:
                 self.__etrField[axis][0].insert(tk.END, str(self.__lblField[axis][0]['text']))
                 self.__etrField[axis][1].insert(tk.END, str(self.__lblField[axis][1]['text']))
+                if 'i' in str(self.__hdu.data[value].dtype) or 'u' in str(self.__hdu.data[value].dtype):
+                    __bin = np.ceil(np.power(2., np.ceil(np.log2((float(self.__lblField[axis][0]['text']) - float(self.__lblField[axis][1]['text'])) / 500.))))
+                elif 'f' in str(self.__hdu.data[value].dtype):
+                    __bin = np.power(2., np.ceil(np.log2((float(self.__lblField[axis][0]['text']) - float(self.__lblField[axis][1]['text'])) / 500.)))
+                else:
+                    __bin = ''
             else:
                 self.__etrField[axis][0].insert(tk.END, str(self.__lblField[axis][2]['text']))
                 self.__etrField[axis][1].insert(tk.END, str(self.__lblField[axis][3]['text']))
+                if 'i' in str(self.__hdu.data[value].dtype) or 'u' in str(self.__hdu.data[value].dtype):
+                    __bin = np.ceil(np.power(2., np.ceil(np.log2((float(self.__lblField[axis][2]['text']) - float(self.__lblField[axis][3]['text'])) / 500.))))
+                elif 'f' in str(self.__hdu.data[value].dtype):
+                    __bin = np.power(2., np.ceil(np.log2((float(self.__lblField[axis][2]['text']) - float(self.__lblField[axis][3]['text'])) / 500.)))
+                else:
+                    __bin = ''
+            self.__etrField[axis][2].insert(tk.END, str(__bin))
     def __makeHist(self):
         xvalue = self.__cmbField[0].get()
         yvalue = self.__cmbField[1].get()
@@ -141,7 +155,10 @@ class Hist:
             try:
                 xmax = float(self.__lblField[0][0]['text'])
             except:
-                xmax = float(self.__lblField[0][2]['text'])
+                try:
+                    xmax = float(self.__lblField[0][2]['text'])
+                except:
+                    msg.showerror(title='Input number error', message='Please specify Max of X properly')
         try:
             xmin = float(self.__etrField[0][1].get())
             if xmin > xmax:
@@ -150,7 +167,10 @@ class Hist:
             try:
                 xmin = float(self.__lblField[0][1]['text'])
             except:
-                xmin = float(self.__lblField[0][3]['text'])
+                try:
+                    xmin = float(self.__lblField[0][3]['text'])
+                except:
+                    msg.showerror(title='Input number error', message='Please specify Min of X properly')
         try:
             __xbinsize = float(self.__etrField[0][2].get())
             xbin = int((xmax - xmin) / __xbinsize)
@@ -161,9 +181,18 @@ class Hist:
             xunit = ' / ' + self.__hdu.header['TUNIT' + str(ix)]
         except:
             xunit = ''
-        fig, ax = plt.subplots()
         if nHistDim == 1:
-            pass
+            lx = np.array(self.__hdu.data[xvalue], dtype=float)
+            x = np.linspace(xmin, xmax, xbin)
+            hist, _ = np.histogram(lx, bins=xbin, range=(xmin, xmax))
+            fig, ax = plt.subplots()
+            ax.plot(x, hist)
+            ax.grid()
+            ax.set_xlabel(xvalue + xunit)
+            ax.set_ylabel('counts')
+            plt.show()
+            plt.clf()
+            plt.close()
         else:
             try:
                 ymax = float(self.__etrField[1][0].get())
@@ -171,7 +200,10 @@ class Hist:
                 try:
                     ymax = float(self.__lblField[1][0]['text'])
                 except:
-                    ymax = float(self.__lblField[1][2]['text'])
+                    try:
+                        ymax = float(self.__lblField[1][2]['text'])
+                    except:
+                        msg.showerror(title='Input number error', message='Please specify Max of Y properly')
             try:
                 ymin = float(self.__etrField[1][1].get())
                 if ymin > ymax:
@@ -180,12 +212,15 @@ class Hist:
                 try:
                     ymin = float(self.__lblField[1][1]['text'])
                 except:
-                    ymin = float(self.__lblField[1][3]['text'])
+                    try:
+                        ymin = float(self.__lblField[1][3]['text'])
+                    except:
+                        msg.showerror(title='Input number error', message='Please specify Min of Y properly')
             try:
                 __ybinsize = float(self.__etrField[1][2].get())
                 ybin = int((ymax - ymin) / __ybinsize)
             except:
-                msg.showerror(title='Input number error', message='Please specify Bin Size of X properly')
+                msg.showerror(title='Input number error', message='Please specify Bin Size of Y properly')
                 return
             try:
                 yunit = ' / ' + self.__hdu.header['TUNIT' + str(iy)]
@@ -198,10 +233,13 @@ class Hist:
             #     if xmin <= self.__hdu.data[xvalue][i] and self.__hdu.data[xvalue][i] <= xmax and ymin <= self.__hdu.data[yvalue][i] and self.__hdu.data[yvalue][i] <= ymax
             #         lx.append(self.__hdu.data[xvalue][i])
             #         ly.append(self.__hdu.data[yvalue][i])
+            fig, ax = plt.subplots()
             ax.set_aspect('equal')
             hi, xe, ye, img = ax.hist2d(lx, ly, bins=[xbin, ybin], range=[[xmin, xmax], [ymin, ymax]])
+            ax.set_xlabel(xvalue + xunit)
+            ax.set_ylabel(yvalue + yunit)
             plt.colorbar(img)
-        plt.show()
-        plt.clf()
-        plt.close()
+            plt.show()
+            plt.clf()
+            plt.close()
 
