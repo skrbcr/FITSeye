@@ -6,7 +6,6 @@ from astropy.io import fits
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-import plotly.express as px
 
 mpl.style.use('fast')
 
