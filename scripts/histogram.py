@@ -7,6 +7,8 @@ import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
+mpl.style.use('fast')
+
 class Hist:
     def __init__(self, master, hdu):
         self.__hdu = hdu
@@ -14,7 +16,9 @@ class Hist:
         self.__cmbField = [None, None]
         self.__lblField = [[None, None, None, None], [None, None, None, None]]
         self.__etrField = [[None, None, None], [None, None, None]]
+        self.__btn = [None, None, None]
         self.__makeTopDlg(master)
+        self.__strNone = '--None--'
     def __makeTopDlg(self, master):
         self.__dlgTop = tk.Toplevel(master)
         self.__dlgTop.title('FITSeye: Histogram')
@@ -54,7 +58,7 @@ class Hist:
         self.__etrField[0][1].grid(row=8, column=1)
         self.__etrField[1][1] = ttk.Entry(self.__dlgTop)
         self.__etrField[1][1].grid(row=8, column=2)
-        ttk.Label(self.__dlgTop, text='Bins').grid(row=9, column=0)
+        ttk.Label(self.__dlgTop, text='Bin Size').grid(row=9, column=0)
         self.__etrField[0][2] = ttk.Entry(self.__dlgTop)
         self.__etrField[0][2].grid(row=9, column=1)
         self.__etrField[1][2] = ttk.Entry(self.__dlgTop)
@@ -63,14 +67,23 @@ class Hist:
             self.__cmbField[i] = ttk.Combobox(self.__dlgTop, values=self.__lcolname)
             self.__cmbField[i].bind('<<ComboboxSelected>>', lambda event, axis=i: self.__makeField(axis))
             self.__cmbField[i].grid(row=2, column=i+1)
+        self.__btn[0] = ttk.Button(self.__dlgTop, text='Make', command=self.__makeHist)
+        self.__btn[0].grid(row=10, column=0)
+        self.__btn[1] = ttk.Button(self.__dlgTop, text='Export')#, command=self.__makeHist)
+        self.__btn[1].grid(row=10, column=1)
+        self.__btn[2] = ttk.Button(self.__dlgTop, text='Close', command=self.__dlgTop.destroy)
+        self.__btn[2].grid(row=10, column=2)
     def __makeField(self, axis: int):
         value = self.__cmbField[axis].get()
         bLim = True
-        if value == '--None--':
+        if value == self.__strNone:
             self.__lblField[axis][0]['text'] = '---'
             self.__lblField[axis][1]['text'] = '---'
             self.__lblField[axis][2]['text'] = '---'
             self.__lblField[axis][3]['text'] = '---'
+            self.__etrField[axis][0].delete(0, tk.END)
+            self.__etrField[axis][1].delete(0, tk.END)
+            self.__etrField[axis][2].delete(0, tk.END)
         else:
             try:
                 self.__lblField[axis][0]['text'] = str(self.__hdu.header['TLMAX' + str(self.__lcolname.index(value))])
@@ -90,10 +103,105 @@ class Hist:
                     bLim = False
             self.__lblField[axis][2]['text'] = np.max(self.__hdu.data[value])
             self.__lblField[axis][3]['text'] = np.min(self.__hdu.data[value])
+            self.__etrField[axis][0].delete(0, tk.END)
+            self.__etrField[axis][1].delete(0, tk.END)
+            self.__etrField[axis][2].delete(0, tk.END)
             if bLim:
-                pass
-                # self.__etrField[axis][0]['text'] = self.__lblField[axis][0]['text']
-                # self.__etrField[axis][1]['text'] = self.__lblField[axis][1]['text']
+                self.__etrField[axis][0].insert(tk.END, str(self.__lblField[axis][0]['text']))
+                self.__etrField[axis][1].insert(tk.END, str(self.__lblField[axis][1]['text']))
             else:
-                pass
+                self.__etrField[axis][0].insert(tk.END, str(self.__lblField[axis][2]['text']))
+                self.__etrField[axis][1].insert(tk.END, str(self.__lblField[axis][3]['text']))
+    def __makeHist(self):
+        xvalue = self.__cmbField[0].get()
+        yvalue = self.__cmbField[1].get()
+        nHistDim = 2
+        # Check Inputs
+        if xvalue in self.__lcolname:
+            if xvalue == self.__strNone or xvalue == '':
+                msg.showerror(title='Data select error', message='Please select x axis data')
+                return
+            else:
+                ix = self.__lcolname.index(xvalue)
+        else:
+            msg.showerror(title='Data select error', message='Please select proper x data.\nItem "' + xvalue + '" does not exist.')
+            return
+        if yvalue in self.__lcolname or yvalue == '':
+            if yvalue == self.__strNone or yvalue == '':
+                nHistDim = 1
+            else:
+                iy = self.__lcolname.index(yvalue)
+        else:
+            msg.showerror(title='Data select error', message='Please select proper y data.\nItem "' + yvalue + '" does not exist.')
+            return
+        # Draw Graph
+        try:
+            xmax = float(self.__etrField[0][0].get())
+        except:
+            try:
+                xmax = float(self.__lblField[0][0]['text'])
+            except:
+                xmax = float(self.__lblField[0][2]['text'])
+        try:
+            xmin = float(self.__etrField[0][1].get())
+            if xmin > xmax:
+                xmin, xmax = xmax, xmin
+        except:
+            try:
+                xmin = float(self.__lblField[0][1]['text'])
+            except:
+                xmin = float(self.__lblField[0][3]['text'])
+        try:
+            __xbinsize = float(self.__etrField[0][2].get())
+            xbin = int((xmax - xmin) / __xbinsize)
+        except:
+            msg.showerror(title='Input number error', message='Please specify Bin Size of X properly')
+            return
+        try:
+            xunit = ' / ' + self.__hdu.header['TUNIT' + str(ix)]
+        except:
+            xunit = ''
+        fig, ax = plt.subplots()
+        if nHistDim == 1:
+            pass
+        else:
+            try:
+                ymax = float(self.__etrField[1][0].get())
+            except:
+                try:
+                    ymax = float(self.__lblField[1][0]['text'])
+                except:
+                    ymax = float(self.__lblField[1][2]['text'])
+            try:
+                ymin = float(self.__etrField[1][1].get())
+                if ymin > ymax:
+                    ymin, ymax = ymax, ymin
+            except:
+                try:
+                    ymin = float(self.__lblField[1][1]['text'])
+                except:
+                    ymin = float(self.__lblField[1][3]['text'])
+            try:
+                __ybinsize = float(self.__etrField[1][2].get())
+                ybin = int((ymax - ymin) / __ybinsize)
+            except:
+                msg.showerror(title='Input number error', message='Please specify Bin Size of X properly')
+                return
+            try:
+                yunit = ' / ' + self.__hdu.header['TUNIT' + str(iy)]
+            except:
+                yunit = ''
+            lx = np.array(self.__hdu.data[xvalue], dtype=float)
+            ly = np.array(self.__hdu.data[yvalue], dtype=float)
+            # n = len(self.__hdu.data[xvalue])
+            # for i in range(n):
+            #     if xmin <= self.__hdu.data[xvalue][i] and self.__hdu.data[xvalue][i] <= xmax and ymin <= self.__hdu.data[yvalue][i] and self.__hdu.data[yvalue][i] <= ymax
+            #         lx.append(self.__hdu.data[xvalue][i])
+            #         ly.append(self.__hdu.data[yvalue][i])
+            ax.set_aspect('equal')
+            hi, xe, ye, img = ax.hist2d(lx, ly, bins=[xbin, ybin], range=[[xmin, xmax], [ymin, ymax]])
+            plt.colorbar(img)
+        plt.show()
+        plt.clf()
+        plt.close()
 
