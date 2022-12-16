@@ -5,6 +5,7 @@ from tkinter import filedialog as fd
 import tkinter.messagebox as msg
 from astropy.io import fits
 from .histogram import Hist
+from .table import Table
 
 class FileManager:
     def __init__(self, filename: str):
@@ -24,6 +25,7 @@ class FileManager:
             print('Error: something went wrong with making "File Top Dialog". Please notify the author on this issue.', file=sys.stderr)
             raise e
         self.__lhist = []
+        self.__ltable = []
     def __del__(self):
         if self.__hdul != None:
             self.__hdul.close()
@@ -46,11 +48,14 @@ class FileManager:
             if hdu.header['NAXIS'] == 0:
                 ttk.Button(self.__dlgTop, text='Header').grid(row=i+1, column=3)
             else:
-                btn = ttk.Button(self.__dlgTop, text='Hist')
-                btn.bind('<Button-1>', lambda event, i=i: self.__hist(i))
-                ttk.Button(self.__dlgTop, text='Header').grid(row=i+1, column=3)
-                btn.grid(row=i+1, column=4)
-                ttk.Button(self.__dlgTop, text='Table').grid(row=i+1, column=5)
+                btn_hist = ttk.Button(self.__dlgTop, text='Hist')
+                btn_hist.bind('<Button-1>', lambda event, i=i: self.__hist(i))
+                btn_hist.grid(row=i+1, column=4)
+                btn_header = ttk.Button(self.__dlgTop, text='Header')
+                btn_header.grid(row=i+1, column=3)
+                btn_table = ttk.Button(self.__dlgTop, text='Table')
+                btn_table.bind('<Button-1>', lambda event, i=i: self.__table(i))
+                btn_table.grid(row=i+1, column=5)
         # Menu
         menubar = tk.Menu(self.__dlgTop)
         self.__dlgTop.config(menu=menubar)
@@ -61,4 +66,9 @@ class FileManager:
         menubar.add_cascade(label='File', menu=menu_file, underline=0)
     def __hist(self, i: int):
         self.__lhist.append(Hist(self.__dlgTop, self.__hdul[i]))
+    def __table(self, i: int):
+        try:
+            self.__ltable.append(Table(self.__dlgTop, self.__hdul[i], self.__filename, i))
+        except Exception as e:
+            print(e, file=sys.stderr)
 

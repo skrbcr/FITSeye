@@ -190,8 +190,6 @@ class Hist:
             ax.set_xlabel(xvalue + xunit)
             ax.set_ylabel('counts')
             plt.show()
-            plt.clf()
-            plt.close()
         else:
             try:
                 ymax = float(self.__etrField[1][0].get())
@@ -239,6 +237,4 @@ class Hist:
             ax.set_ylabel(yvalue + yunit)
             plt.colorbar(img)
             plt.show()
-            plt.clf()
-            plt.close()
 
