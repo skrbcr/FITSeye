@@ -8,6 +8,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 from astropy.io import fits
 from .file import FileManager
+from .definitions import *
 
 class FITSeye:
     def __init__(self, filename: str=''):
@@ -18,12 +19,12 @@ class FITSeye:
         self.__root.geometry('200x400')
         # self.__root.resizable()
         # self.__root.attributes()
-        self.__root.title('FITSeye')
+        self.__root.title(STRSOFTNAME + '')
         try:
             self.__root.iconbitmap('')
         except:
             pass
-        ttk.Label(self.__root, text='FITSeye version 0.1').pack()
+        ttk.Label(self.__root, text=STRSOFTNAME + ' version 0.1').pack()
         btn_open = self.__makeButton('Open FITS file', self.__evOpenFile).pack()
         # btn_select = self.__makeButton('Select', self.__select.evSelect).pack()
         # btn_expt = self.__makeButton('Export').pack()

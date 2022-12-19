@@ -6,6 +6,7 @@ from astropy.io import fits
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+from .definitions import *
 
 mpl.style.use('fast')
 
@@ -21,7 +22,7 @@ class Hist:
         self.__strNone = '--None--'
     def __makeTopDlg(self, master):
         self.__dlgTop = tk.Toplevel(master)
-        self.__dlgTop.title('FITSeye: Histogram')
+        self.__dlgTop.title(STRSOFTNAME + ': Histogram')
         self.__dlgTop.geometry('600x400')
         self.__dlgTop.focus_set()
         ttk.Label(self.__dlgTop, text='Histogram (1D or 2D)').grid(row=0, column=0)

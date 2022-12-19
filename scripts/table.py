@@ -4,6 +4,7 @@ from tkinter import ttk
 from tkinter import filedialog as fd
 import tkinter.messagebox as msg
 from astropy.io import fits
+from .definitions import *
 
 class Table:
     def __init__(self, master, hdu, filename: str, nIndex: int):
@@ -18,7 +19,7 @@ class Table:
             raise e
     def __makeTopDlg(self):
         self.__dlgTop = tk.Toplevel(master=self.__master)
-        self.__dlgTop.title('FITSeye: Table of HDU No.' + str(self.__nHDU) + ' of ' + self.__filename)
+        self.__dlgTop.title(STRSOFTNAME + ': Table of HDU No.' + str(self.__nHDU) + ' of ' + self.__filename)
         self.__dlgTop.geometry('800x500')
         self.__tree = ttk.Treeview(self.__dlgTop, columns=['index'] + self.__hdu.columns.names, show='headings')
         self.__scrbar = ttk.Scrollbar(self.__dlgTop, orient=tk.HORIZONTAL, command=self.__tree.xview)

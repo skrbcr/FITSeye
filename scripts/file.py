@@ -6,6 +6,7 @@ import tkinter.messagebox as msg
 from astropy.io import fits
 from .histogram import Hist
 from .table import Table
+from .definitions import *
 
 class FileManager:
     def __init__(self, filename: str):
@@ -32,7 +33,7 @@ class FileManager:
     def __makeTopDlg(self):
         # Dialog
         self.__dlgTop = tk.Toplevel()
-        self.__dlgTop.title('FITSeye: Summary of ' + self.__filename)
+        self.__dlgTop.title(STRSOFTNAME + ': Summary of ' + self.__filename)
         self.__dlgTop.geometry('800x300')
         self.__dlgTop.focus_set()
         # Table

@@ -1,0 +1,1 @@
+STRSOFTNAME: str = 'FITS eye'
