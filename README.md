@@ -1,1 +1,1 @@
-# FITSeye
+# FITS eye
