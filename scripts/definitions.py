@@ -1,1 +1,0 @@
-STRSOFTNAME: str = 'FITS eye'
