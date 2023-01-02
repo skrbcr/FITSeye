@@ -42,6 +42,9 @@ void FITS::setHduIndex(const int i) {
     checkError();
     nHdu = i;
 }
+int FITS::getHduType() const noexcept {
+    return nTypeHdu;
+}
 void FITS::checkError() {
     if (status > 0) {
         throw status;
