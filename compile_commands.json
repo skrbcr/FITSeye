@@ -1,7 +1,0 @@
-[
-{
-  "directory": "/home/nsd/documents/fitseye/Debug",
-  "command": "clang++ -DWXUSINGDLL -D_FILE_OFFSET_BITS=64 -D__WXGTK__ -isystem /usr/local/lib/wx/include/gtk3-unicode-3.2 -isystem /usr/local/include/wx-3.2  -pthread -g -Wall -Wextra -O0 -g3 -ggdb -std=gnu++20 -o CMakeFiles/fitseye.dir/src/base.cpp.o -c /home/nsd/documents/fitseye/src/base.cpp",
-  "file": "/home/nsd/documents/fitseye/src/base.cpp"
-}
-]

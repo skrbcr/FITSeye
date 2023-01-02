@@ -1,1 +1,5 @@
 Debug/
+Testing/
+.cache/
+sample/*.fits
+compile_commands.json
