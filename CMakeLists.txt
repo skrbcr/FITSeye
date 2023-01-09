@@ -1,13 +1,13 @@
-cmake_minimum_required(VERSION 3.22)
+cmake_minimum_required(VERSION 3.14)
 project(fitseye)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # set(CMAKE_C_STANDARD 17)
 # set(CMAKE_C_STANDARD_REQUIRED ON)
-set(CMAKE_C_COMPILER clang)
+set(CMAKE_C_COMPILER /usr/bin/clang)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_COMPILER clang++)
+set(CMAKE_CXX_COMPILER /usr/bin/clang++)
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=lld")
 
 find_package(wxWidgets COMPONENTS core base REQUIRED)
@@ -40,7 +40,7 @@ target_link_libraries(test_fits
     GTest::gtest GTest::gtest_main
     # $<IF:$<VERSION_GREATER_EQUAL:${CMAKE_VERSION},3.20>, GTest::gtest, GTest::GTest>
 )
-add_test(NAME fits_test COMMAND test_fits)
+add_test(COMMAND test_fits)
 target_compile_options(test_fits PRIVATE
     -Wall -Wextra
     $<$<CONFIG:Debug>: -O0 -g3 -ggdb>

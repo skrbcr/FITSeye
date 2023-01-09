@@ -71,10 +71,34 @@ TEST_F(FITStest, HDUINDEX) {
 }
 TEST_F(FITStest, GETHDUTYPE) {
     EXPECT_EQ(fits1.getHduType(), IMAGE_HDU);
-    EXPECT_NO_THROW(fits1.setHduIndex(2));
+    fits1.setHduIndex(2);
     EXPECT_EQ(fits1.getHduType(), BINARY_TBL);
-    EXPECT_NO_THROW(fits3.setHduIndex(2));
+    fits3.setHduIndex(2);
     EXPECT_EQ(fits3.getHduType(), ASCII_TBL);
+}
+TEST_F(FITStest, GETIMGDIM) {
+    EXPECT_EQ(fits1.getImgDim(), 6);
+    fits1.setHduIndex(2);
+    EXPECT_ANY_THROW(fits1.getImgDim());
+    fits2.setHduIndex(2);
+    EXPECT_EQ(fits2.getImgDim(), 2);
+    fits2.setHduIndex(6);
+    EXPECT_ANY_THROW(fits2.getImgDim());
+    EXPECT_EQ(fits7.getImgDim(), 0);
+    EXPECT_EQ(fits11.getImgDim(), 3);
+}
+TEST_F(FITStest, GETIMGSHAPE) {
+    EXPECT_EQ(strcmp(fits1.getImgShape().c_str(), "0 x 3 x 4 x 1 x 1 x 1"), 0);
+    fits1.setHduIndex(2);
+    EXPECT_ANY_THROW(fits1.getImgShape());
+    fits2.setHduIndex(2);
+    EXPECT_EQ(strcmp(fits2.getImgShape().c_str(), "512 x 512"), 0);
+    fits2.setHduIndex(3);
+    EXPECT_EQ(strcmp(fits2.getImgShape().c_str(), "2048 x 300"), 0);
+    fits2.setHduIndex(6);
+    EXPECT_ANY_THROW(fits2.getImgShape().c_str());
+    EXPECT_EQ(strcmp(fits7.getImgShape().c_str(), "0"), 0);
+    EXPECT_EQ(strcmp(fits11.getImgShape().c_str(), "200 x 200 x 4"), 0);
 }
 
 int main(int argc, char **argv) {

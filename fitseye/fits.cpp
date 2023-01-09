@@ -1,6 +1,9 @@
 #include "fits.hpp"
+#include <algorithm>
+#include <fitsio.h>
 #include <iostream>
 #include <longnam.h>
+#include <string>
 
 namespace skrbcr {
 FITS::FITS() {
@@ -45,7 +48,29 @@ void FITS::setHduIndex(const int i) {
 int FITS::getHduType() const noexcept {
     return nTypeHdu;
 }
-void FITS::checkError() {
+int FITS::getImgDim() {
+    int ndim;
+    fits_get_img_dim(pFile, &ndim, &status);
+    checkError();
+    return ndim;
+}
+string FITS::getImgShape() {
+    int ndim = getImgDim();
+    if (ndim != 0) {
+        vector<long> nsize(ndim);
+        fits_get_img_size(pFile, ndim, &(nsize[0]), &status);
+        string res = std::to_string(nsize[0]);
+        std::for_each(nsize.begin() + 1, nsize.end(), [&res](const long s) {
+            res += " x " + std::to_string(s);
+        });
+        checkError();
+        return res;
+    }
+    else {
+        return "0";
+    }
+}
+void FITS::checkError() const {
     if (status > 0) {
         throw status;
     }

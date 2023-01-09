@@ -3,16 +3,18 @@
 
 #include <string>
 #include <string_view>
+#include <vector>
 #include <exception>
 #include <fitsio.h>
 
 namespace skrbcr {
 using std::string;
 using std::string_view;
+using std::vector;
 class FITS {
 private:
     fitsfile *pInFile = nullptr;    // input fits file
-    fitsfile *pFile = nullptr;   // temporary fits file
+    fitsfile *pFile = nullptr;      // temporary fits file
     string strInFilename = "";      // filename of input
     string strTmpFilename = "";     // filename of temporary
     int status = 0;                 // error status
@@ -31,8 +33,9 @@ public:
     void setHduIndex(const int i);
     int getHduType() const noexcept;
     // image hdu routines
-    int getImgType() const;
-    int getImgDim() const;
+    //int getImgType() const;
+    int getImgDim();
+    string getImgShape();
     // table hdu routines
     long getTabNumRows() const;
     int getTabNumCols() const;
@@ -45,7 +48,7 @@ public:
     void getHduHeader(string_view records);
 
 private:
-    void checkError();
+    void checkError() const;
 };
 }
 
